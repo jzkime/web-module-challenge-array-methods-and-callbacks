@@ -107,7 +107,16 @@ function getWinners(arr, cb) {
         } else if(objects["Away Team Goals"] > objects["Home Team Goals"]) {
             return objects["Away Team Name"];
         }else if(objects["Away Team Goals"] === objects["Home Team Goals"]){
-            return `It's a tie between ${objects["Home Team Name"]} and ${objects["Away Team Name"]}`
+
+            //additional condition to find the tie split
+            const splicedString = objects["Win conditions"].split(' ')
+                if(splicedString.includes(objects["Home Team Name"])){
+                    return objects["Home Team Name"];
+                } else if(splicedString.includes(objects["Away Team Name"])){
+                    return objects["Away Team Name"];
+                } else {
+                    return `This did not work`
+                }
         }
     })
     return winners;
@@ -172,33 +181,257 @@ Create a function called `getCountryWins` that takes the parameters `data` and `
 Hint: Investigate your data to find "team initials"!
 Hint: use `.reduce` */
 
-function getCountryWins(/* code here */) {
+function getCountryWins(data, initials, finals){
+    const homeIN = "Home Team Initials";
+    const awayIN = "Away Team Initials";
+    const homeGoal = "Home Team Goals"
+    const awayGoal = "Away Team Goals"
 
-    /* code here */
+    const init = initials.toUpperCase()
 
+
+    const winn = finals(data).map((elem) => {
+        if(elem[homeGoal] > elem[awayGoal]){
+            return elem[homeIN]
+        } else if(elem[homeGoal] < elem[awayGoal]) {
+            return elem[awayIN]
+        } else if (elem[homeGoal] === elem[awayGoal]){
+            const winCo = elem["Win conditions"].split(' ')
+
+            if(winCo.includes(elem["Home Team Name"])){
+                return elem[homeIN]
+            } else if(winCo.includes(elem["Away Team Name"])) {
+                return elem[awayIN]
+            }
+            return;
+        }
+        return;
+    })
+
+    console.log(winn)
+        
+    let counter = 0;
+
+    winn.forEach((elem) => {
+
+        if(elem === init){
+            counter++
+            return;
+        } else if(elem === init){
+            counter++
+            return;
+        } else {
+            // return console.log('help');
+        }
+
+    })
+
+    if(counter !== 0){
+        return `The country you have input (${initials}) has won the world cup ${counter} times!`
+    } else if(counter === 0) { 
+        return `The country you have input (${initials})has never won the world cup.`
+    }
+
+    return includes;
+    //needs function that cycles matchs winner initials 
+    //needs function that matches initials to winner
 }
 
+console.log(getCountryWins(fifaData, "FRG", getFinals))
 
 
 /* 💪💪💪💪💪 Stretch 2: 💪💪💪💪💪 
 Write a function called getGoals() that accepts a parameter `data` and returns the team with the most goals score per appearance (average goals for) in the World Cup finals */
 
-function getGoals(/* code here */) {
+function getGoals(data) {
 
-    /* code here */
+    //find team with most goals
+    // divide how many times that team has played
+    const homeNgoal = data.map((elem) => {
+        return {name: elem["Home Team Name"], goal: elem["Home Team Goals"]}
+    })
+
+    const awayNgoal = data.map((elem) => {
+        return {name: elem["Away Team Name"], goal: elem["Away Team Goals"]}
+    })
+
+    const allNameNgoal = [...homeNgoal, ...awayNgoal]
+
+    // loop through array
+    // goal : group like name into one object ?
+
+    const setName = new Set(allNameNgoal.map(elem => elem.name))
+    const arrayName = [...setName]
+
+    //create set = one name
+    // turn set into array
+    // push each goal into corresponding object
+
+    const grouped = []
+
+    //creates base object
+    arrayName.forEach((elem) => {
+        grouped.push({name: elem, goal: 0, appear: 0, goalPerApp: 0})
+    })
+
+    // allNameNgoal.forEach((elem) => {
+    //     if(elem.name === grouped.name) {
+    //         grouped.push
+    //     }
+    // })
+
+    //need one loop to go over the array with name and goals
+    //nested loop to go over setArray == find corresponding object
+
+    //goes over each object in name and goal array
+    for(let i = 0; i < allNameNgoal.length; i++) {
+
+        // loops over set array(array for group)
+        for(let j = 0; j < grouped.length; j++) {
+
+            if(allNameNgoal[i].name === grouped[j].name) {
+                let counter = grouped[j].goal;
+                counter += allNameNgoal[i].goal;
+                grouped[j].goal = counter;
+                // grouped[j].push(allNameNgoal[i].goal)
+            }
+        }
+
+        // loop to accumulate total appear
+        for(let k = 0; k < grouped.length; k++) {
+            if(allNameNgoal[i].name === grouped[k].name) {
+                let countApp = grouped[k].appear
+                countApp++
+                grouped[k].appear = countApp;
+            }
+        }
+    }
+
+    const avGoalperApp = []
+
+    grouped.forEach((elem) => {
+        let quot = Math.round(elem.goal / elem.appear);
+
+        avGoalperApp.push(quot);
+
+        let num = elem.goalPerApp;
+        num += quot
+        elem.goalPerApp = num;
+    })
+
+    const greatestAv = Math.max(...avGoalperApp)
+
+    const indexHold = []
+
+    for(let l = 0; l < grouped.length; l++) {
+        if(grouped[l].goalPerApp === greatestAv) {
+            indexHold.push(grouped.indexOf(grouped[l]))
+        }
+    }
+
+    if(indexHold.length <= 1) {
+        return `The team with the greatest goals per appearance is ${grouped[indexHold[0]].name}`
+    } else {
+        return `The teams with the greatest goals per appearance is ${grouped[indexHold[0]].name} and ${grouped[indexHold[1]].name} at a ${grouped[indexHold[0]].goalPerApp} point average!`
+    }
 
 }
 
+const finalFIFA = getFinals(fifaData)
+console.log(getGoals(finalFIFA))
 
 /* 💪💪💪💪💪 Stretch 3: 💪💪💪💪💪
 Write a function called badDefense() that accepts a parameter `data` and calculates the team with the most goals scored against them per appearance (average goals against) in the World Cup finals */
 
-function badDefense(/* code here */) {
+function badDefense(data) {
 
-    /* code here */
+    //find team with most goals
+    // divide how many times that team has played
+    const homeNgoal = data.map((elem) => {
+        return {name: elem["Home Team Name"], goalOppos: elem["Away Team Goals"]}
+    })
+
+    const awayNgoal = data.map((elem) => {
+        return {name: elem["Away Team Name"], goalOppos: elem["Home Team Goals"]}
+    })
+
+    const allNameNgoal = [...homeNgoal, ...awayNgoal]
+
+    // loop through array
+    // goal : group like name into one object ?
+
+    const setName = new Set(allNameNgoal.map(elem => elem.name))
+    const arrayName = [...setName]
+
+    //create set = one name
+    // turn set into array
+    // push each goal into corresponding object
+
+    const grouped = []
+
+    //creates base object
+    arrayName.forEach((elem) => {
+        grouped.push({name: elem, goalOppos: 0, appear: 0, opposGoalPerApp: 0})
+    })
+
+    //need one loop to go over the array with name and goals
+    //nested loop to go over setArray == find corresponding object
+
+    //goes over each object in name and goal array
+    for(let i = 0; i < allNameNgoal.length; i++) {
+
+        // loops over set array(array for group)
+        for(let j = 0; j < grouped.length; j++) {
+
+            if(allNameNgoal[i].name === grouped[j].name) {
+                let counter = grouped[j].goalOppos;
+                counter += allNameNgoal[i].goalOppos;
+                grouped[j].goalOppos = counter;
+                // grouped[j].push(allNameNgoal[i].goal)
+            }
+        }
+
+        // loop to accumulate total appear
+        for(let k = 0; k < grouped.length; k++) {
+            if(allNameNgoal[i].name === grouped[k].name) {
+                let countApp = grouped[k].appear
+                countApp++
+                grouped[k].appear = countApp;
+            }
+        }
+    }
+
+    const avGoalperApp = []
+
+    grouped.forEach((elem) => {
+        let quot = Math.round(elem.goalOppos / elem.appear);
+
+        avGoalperApp.push(quot);
+
+        let num = elem.opposGoalPerApp;
+        num += quot
+        elem.opposGoalPerApp = num;
+    })
+
+    const greatestAv = Math.max(...avGoalperApp)
+
+    const indexHold = []
+
+    for(let l = 0; l < grouped.length; l++) {
+        if(grouped[l].opposGoalPerApp === greatestAv) {
+            indexHold.push(grouped.indexOf(grouped[l]))
+        }
+    }
+
+    if(indexHold.length <= 1) {
+        return `The team with the weakest defense per appearance is ${grouped[indexHold[0]].name} at a ${grouped[indexHold[0]].opposGoalPerApp} point average against them...`
+    } else {
+        return `The teams with the weakest defense per appearance is ${grouped[indexHold[0]].name} and ${grouped[indexHold[1]].name} at a ${grouped[indexHold[0]].opposGoalPerApp} point average against them...`
+    }
 
 }
 
+console.log(badDefense(finalFIFA))
 
 /* If you still have time, use the space below to work on any stretch goals of your chosing as listed in the README file. */
 
